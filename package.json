@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "main": "index.js",
   "license": "MIT",
+  "private": true,
   "dependencies": {
     "aws-sdk": "^2.358.0",
     "greenlock": "^2.4.10"
