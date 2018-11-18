@@ -32,7 +32,7 @@ const opts = {
     challengeType: 'dns-01',
 }
 
-console.log(`Running in ${useLive ? 'Live' : 'Test'} mode`)
+console.log(`Running in ${useLive ? 'Live' : 'Test'} Mode`)
 
 greenlock.register(opts)
 .then(({subject}) => {

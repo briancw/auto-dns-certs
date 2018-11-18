@@ -1,9 +1,20 @@
 {
   "name": "auto-dns-certs",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "index.js",
   "license": "MIT",
   "private": true,
+  "contributors": [
+    {
+      "name": "Brian Whicheloe",
+      "email": "brian@whicheloe.us",
+      "url": "https://whicheloe.us"
+    },
+    {
+      "name": "Jacob Smith",
+      "email": "messagethesmith@gmail.com"
+    }
+  ],
   "dependencies": {
     "aws-sdk": "^2.358.0",
     "greenlock": "^2.4.10"

@@ -1,5 +1,6 @@
 /* eslint-disable require-jsdoc, max-params, no-div-regex */
 const Challenge = module.exports
+const AWS = require('aws-sdk')
 
 Challenge.create = function(defaults) {
     return {
@@ -21,27 +22,32 @@ Challenge.set = async function(args, domain, challenge, keyAuthorization, cb) {
     .replace(/\//g, '_')
     .replace(/=+$/g, '')
 
-    const config = this.getOptions()
-    const AWS = require('aws-sdk')
-    AWS.config.accessKeyId = config.awsAccessKey
-    AWS.config.secretAccessKey = config.awsSecretKey
+    const {awsAccessKey, awsSecretKey} = this.getOptions()
+    if (!awsAccessKey || !awsSecretKey) {
+        throw new Error('Missing AWS Keys.')
+    }
+
+    AWS.config.accessKeyId = awsAccessKey
+    AWS.config.secretAccessKey = awsSecretKey
+
     const route53 = new AWS.Route53()
 
-    // Get all domains from Route53
+    // Get all Hosted Zones from Route53.
     let {HostedZones} = await route53.listHostedZonesByName().promise()
     let zoneId
+    let domainWithDot = domain + '.'
 
-    // Find the one we are trying to modify
-    HostedZones.forEach((zone) => {
-        let domainWithDot = domain + '.'
-        if (domainWithDot.includes(zone.Name)) {
-            zoneId = zone.Id
-            console.log(`Found domain on Route53. ${zone.Name} ${zoneId}`)
+    // Find Hosted Zone we are trying to modify.
+    for (let {Name: name, Id: id} of HostedZones) {
+        if (domainWithDot.includes(name)) {
+            zoneId = id
+            console.log(`Found domain on Route53. ${name} ${zoneId}`)
+            break
         }
-    })
+    }
 
     if (!zoneId) {
-        throw new Error('The requested domain name did not have a matching record set')
+        throw new Error('The requested domain name did not have a matching record set.')
     }
 
     // Create TXT record.
@@ -63,9 +69,9 @@ Challenge.set = async function(args, domain, challenge, keyAuthorization, cb) {
         HostedZoneId: zoneId,
     }
     let {ChangeInfo: {Id: changeId}} = await route53.changeResourceRecordSets(changeParams).promise()
-    console.log(`Change request submitted. Id: ${changeId}`)
+    console.log(`Change request submitted. Id: ${changeId}\nWaiting for propigation...`)
 
-    // Wait until Route53 reports that the TXT record has been propagated
+    // Wait until Route53 reports that the TXT record has been propagated.
     await route53.waitFor('resourceRecordSetsChanged', {Id: changeId}).promise()
     cb()
 }
