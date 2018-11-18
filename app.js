@@ -1,14 +1,26 @@
-const {domains, email, awsKeys, useLive} = require('./config.js')
-const leChallengeR53 = require('./le-challenge-r53.js').create({awsKeys})
+const path = require('path')
+const config = require('./config.js')
+const {domains, email, useLive} = config
 const server = useLive ? 'https://acme-v02.api.letsencrypt.org/directory' : 'https://acme-staging-v02.api.letsencrypt.org/directory'
+const configDir = path.resolve(__dirname, 'certs')
 
 const greenlock = require('greenlock').create({
     version: 'draft-12',
     server,
     configDir: '/tmp/acme/etc',
     challenges: {
-        'dns-01': leChallengeR53,
+        'dns-01': require('./le-challenge-r53.js').create(config),
     },
+    store: require('le-store-certbot').create({
+        configDir,
+        privkeyPath: `${configDir}/live/:hostname/privkey.pem`,
+        fullchainPath: `${configDir}/live/:hostname/fullchain.pem`,
+        certPath: `${configDir}/live/:hostname/cert.pem`,
+        chainPath: `${configDir}/live/:hostname/chain.pem`,
+        logsDir: path.resolve(__dirname, 'logs'),
+        // debug: true,
+        // webrootPath: '~/acme/srv/www/:hostname/.well-known/acme-challenge',
+    }),
 })
 
 const opts = {
@@ -20,9 +32,11 @@ const opts = {
     challengeType: 'dns-01',
 }
 
-greenlock.register(opts).then(function(certs) {
-    console.log(certs)
-    // privkey, cert, chain, expiresAt, issuedAt, subject, altnames
-}, function(err) {
-    console.error(err)
+console.log(`Running in ${useLive ? 'Live' : 'Test'} mode`)
+
+greenlock.register(opts)
+.then(({subject}) => {
+    console.log(`${subject} complete`)
+    console.log(`Certificates have been placed in ${configDir}`)
 })
+.catch(console.error)
