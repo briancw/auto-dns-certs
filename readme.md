@@ -28,3 +28,7 @@ Example:
 This will match.  
 zone id: `example.com`  
 config domain: `foo.bar.example.com`
+
+
+#### Note on usage with haproxy
+If you're using this utility with haproxy it will want a single file consisting of `fullchain.pem` with `privkey.pem` pasted in afterwards.

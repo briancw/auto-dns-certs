@@ -12,7 +12,8 @@
     },
     {
       "name": "Jacob Smith",
-      "email": "messagethesmith@gmail.com"
+      "email": "messagethesmith@gmail.com",
+      "url": "https://jacobsmith.tech"
     }
   ],
   "dependencies": {
