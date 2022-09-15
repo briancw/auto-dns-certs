@@ -1,7 +1,7 @@
 {
   "name": "auto-dns-certs",
-  "version": "0.0.2",
-  "main": "index.js",
+  "version": "0.0.3",
+  "main": "app.js",
   "license": "MIT",
   "private": true,
   "contributors": [
